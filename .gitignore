@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Auth Files
-./auth.txt
+auth.txt
 
 # Runtime data
 pids
