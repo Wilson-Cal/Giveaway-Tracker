@@ -1,0 +1,29 @@
+{
+  "name": "giveaway-tracker",
+  "version": "1.0.0",
+  "description": "Tracks the entries twitch followers receive for Giveaways.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wilson-Cal/Giveaway-Tracker.git"
+  },
+  "keywords": [
+    "Twitch",
+    "Giveaway",
+    "Tracker"
+  ],
+  "author": "Cal Wilson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Wilson-Cal/Giveaway-Tracker/issues"
+  },
+  "homepage": "https://github.com/Wilson-Cal/Giveaway-Tracker#readme",
+  "dependencies": {
+    "async": "^2.6.1",
+    "d3-dsv": "^1.0.10"
+  }
+}
