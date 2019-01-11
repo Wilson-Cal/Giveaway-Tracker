@@ -43,6 +43,10 @@ function getTwitchInfo(apiCall, callback) {
 
 function parseCSV(filepath, callback) {
     fs.readFile(filepath, 'utf8', (err, data) => {
+        if (err) {
+            callback(err, null);
+            return;
+        }
         let parsedCSV = d3.csvParse(data);
         callback(null, parsedCSV);
     });
@@ -54,21 +58,51 @@ function checkFollowers(followers, csv) {
         if (followCheck) {
             csv.push({
                 Followers: follower.from_name,
-                Entries: 1
+                Entries: 1,
+                'Last Message Timestamp': ''
             });
         }
     });
     return csv;
 }
 
+function getUserData(formattedMessages) {
+    let userData = [];
+    formattedMessages.forEach(fMessage => {
+        userData.push(fMessage.map(element => {
+            if (/^tmi-sent-ts=/.test(element)) {
+                let i = element.indexOf('=');
+                return element.slice(i + 1);
+            } else if (/^user-type=/.test(element)) {
+                let i1 = element.indexOf(':');
+                let i2 = element.indexOf('!');
+                return element.slice(i1 + 1, i2);
+            }
+        }));
+    });
+    return userData;
+}
+
 function checkParticpants(messages, csv) {
     let formattedMessages = messages.map(message => {
         return message.split(';', 14);
     });
+
     formattedMessages = formattedMessages.map(fMessage => {
-        return [fMessage[10], fMessage[fMessage.length - 1]]; // Regex
+        return fMessage.filter(element => {
+            if (/^tmi-sent-ts=/.test(element)) {
+                return true;
+            } else if (/^user-type=/.test(element)) {
+                return true;
+            }
+            return false;
+        });
     });
-    console.log(formattedMessages);
+    let userData = getUserData(formattedMessages);
+    userData.forEach(element => {
+        let date = new Date(parseInt(element[0]));
+        console.log(date);
+    });
 }
 
 function writeCSV(updatedCSV) {
@@ -79,13 +113,22 @@ function writeCSV(updatedCSV) {
     });
 }
 
-asyncLib.map(apiCalls, getTwitchInfo, (err, data) => {
-    if (err) {
-        console.error(err);
-    }
-    parseCSV('./50for50.csv', (err, csv) => {
-        let updatedCSV = checkFollowers(data[0].data, csv);
-        updatedCSV = checkParticpants(data[1].messages, updatedCSV);
-        //writeCSV(updatedCSV);
+// Start Here
+fs.readFile('./auth.txt', 'utf8', (err, result) => {
+    options.headers['Client-ID'] = result;
+    asyncLib.map(apiCalls, getTwitchInfo, (err, data) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        parseCSV('./50for50.csv', (err, csv) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            let updatedCSV = checkFollowers(data[0].data, csv);
+            updatedCSV = checkParticpants(data[1].messages, updatedCSV);
+            //writeCSV(updatedCSV);
+        });
     });
 });
