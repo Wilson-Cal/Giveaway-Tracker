@@ -4,7 +4,6 @@ const fs = require('fs');
 const asyncLib = require('async');
 const moment = require('moment');
 
-
 let options = {
     host: 'tmi.twitch.tv',
     method: 'GET',
