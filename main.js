@@ -74,10 +74,9 @@ function getUserData(formattedMessages) {
             if (/^tmi-sent-ts=/.test(element)) {
                 let i = element.indexOf('=');
                 return element.slice(i + 1);
-            } else if (/^user-type=/.test(element)) {
-                let i1 = element.indexOf(':');
-                let i2 = element.indexOf('!');
-                return element.slice(i1 + 1, i2);
+            } else if (/^display-name=/.test(element)) {
+                let i = element.indexOf('=');
+                return element.slice(i + 1);
             }
         }));
     });
@@ -92,7 +91,7 @@ function checkParticpants(messages, csv) {
         return fMessage.filter(element => {
             if (/^tmi-sent-ts=/.test(element)) {
                 return true;
-            } else if (/^user-type=/.test(element)) {
+            } else if (/^display-name=/.test(element)) {
                 return true;
             }
             return false;
@@ -100,18 +99,19 @@ function checkParticpants(messages, csv) {
     });
     let userData = getUserData(formattedMessages);
     userData.forEach(element => {
-        let twitchDate = moment(parseInt(element[0]));
-        let currentUserTwitch = element[1];
+        let twitchDate = moment(parseInt(element[1]));
+        let currentUserTwitch = element[0];
         csv.forEach(row => {
             let lastMessageTimestamp = row['Last Message Timestamp'];
+            // console.log(currentUserTwitch.toLowerCase(), row.Followers.toLowerCase());
             if (lastMessageTimestamp === '' && currentUserTwitch.toLowerCase() === row.Followers.toLowerCase()) {
                 row.Entries++;
-                row['Last Message Timestamp'] = element[0];
+                row['Last Message Timestamp'] = element[1];
             } else if (lastMessageTimestamp && currentUserTwitch.toLowerCase() === row.Followers.toLowerCase()) {
                 let csvDate = moment(parseInt(lastMessageTimestamp));
                 if (twitchDate.dayOfYear() > csvDate.dayOfYear()) {
                     row.Entries++;
-                    row['Last Message Timestamp'] = element[0];
+                    row['Last Message Timestamp'] = element[1];
                 }
             }
         });
