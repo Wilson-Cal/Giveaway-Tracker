@@ -109,8 +109,8 @@ function checkParticpants(messages, csv) {
                 row.Entries++;
                 row['Last Message Timestamp'] = element[0];
             } else if (lastMessageTimestamp && currentUserTwitch.toLowerCase() === row.Followers.toLowerCase()) {
-                let csvDate = moment(lastMessageTimestamp);
-                if (twitchDate > csvDate) {
+                let csvDate = moment(parseInt(lastMessageTimestamp));
+                if (twitchDate.dayOfYear() > csvDate.dayOfYear()) {
                     row.Entries++;
                     row['Last Message Timestamp'] = element[0];
                 }
