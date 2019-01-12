@@ -23,6 +23,8 @@ function buildTable(followerData) {
             if (i === 2) {
                 if (element) {
                     element = moment(parseInt(element)).format('MM-DD-YYYY');
+                } else {
+                    element = 'N/A';
                 }
             }
             value = document.createTextNode(element);
