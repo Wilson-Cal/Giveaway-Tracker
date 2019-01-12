@@ -2,6 +2,8 @@ const https = require('https');
 const d3 = require('d3-dsv');
 const fs = require('fs');
 const asyncLib = require('async');
+const moment = require('moment');
+
 
 let options = {
     host: 'tmi.twitch.tv',
@@ -87,7 +89,6 @@ function checkParticpants(messages, csv) {
     let formattedMessages = messages.map(message => {
         return message.split(';', 14);
     });
-
     formattedMessages = formattedMessages.map(fMessage => {
         return fMessage.filter(element => {
             if (/^tmi-sent-ts=/.test(element)) {
@@ -100,9 +101,23 @@ function checkParticpants(messages, csv) {
     });
     let userData = getUserData(formattedMessages);
     userData.forEach(element => {
-        let date = new Date(parseInt(element[0]));
-        console.log(date);
+        let twitchDate = moment(parseInt(element[0]));
+        let currentUserTwitch = element[1];
+        csv.forEach(row => {
+            let lastMessageTimestamp = row['Last Message Timestamp'];
+            if (lastMessageTimestamp === '' && currentUserTwitch.toLowerCase() === row.Followers.toLowerCase()) {
+                row.Entries++;
+                row['Last Message Timestamp'] = element[0];
+            } else if (lastMessageTimestamp && currentUserTwitch.toLowerCase() === row.Followers.toLowerCase()) {
+                let csvDate = moment(parseInt(lastMessageTimestamp));
+                if (twitchDate.dayOfYear() > csvDate.dayOfYear()) {
+                    row.Entries++;
+                    row['Last Message Timestamp'] = element[0];
+                }
+            }
+        });
     });
+    return csv;
 }
 
 function writeCSV(updatedCSV) {
@@ -110,6 +125,7 @@ function writeCSV(updatedCSV) {
         if (err) {
             console.error(err);
         }
+        console.log('CSV Updated Successfully');
     });
 }
 
@@ -128,7 +144,7 @@ fs.readFile('./auth.txt', 'utf8', (err, result) => {
             }
             let updatedCSV = checkFollowers(data[0].data, csv);
             updatedCSV = checkParticpants(data[1].messages, updatedCSV);
-            //writeCSV(updatedCSV);
+            writeCSV(updatedCSV);
         });
     });
 });
