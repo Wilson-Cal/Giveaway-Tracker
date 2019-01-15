@@ -1,5 +1,8 @@
-#giveaway_tracker_table {
+* {
     font-family: Arial, Helvetica, sans-serif;
+}
+
+#giveaway_tracker_table {
     text-align: left;
     border-collapse: collapse;
 }
@@ -20,3 +23,5 @@
     background-color: #4791ce;
     color: white;
 }
+
+#drawingSimulator {}
